@@ -60,3 +60,20 @@ def ABW_Calculator (DataFrame, IBW = "Ideal_Weight", Weight =  'Weight'):
     IBW = DataFrame[IBW] 
     Weight = DataFrame[Weight] 
     return (IBW + 0.4 * (Weight - IBW))
+
+def GFR_Calculator (DataFrame, Creatinine='Creatinine', Sex =  'Sex', Age='Age', Weight = 'Weight', Equation='MDRD'): 
+# Version: 1.0 (29/7/2019) 
+# Assumption: No Black Patients 
+# Method: 
+## GFR by the MDRD Equation = 186 × Serum Cr^-1.154 * age^-0.203 × 1.212 (if patient is black) × 0.742 (if female)
+## CrCl by the Cockcroft-Gault Equation == (140 – age) × (weight, kg) × (0.85 if female) / (72 × Cr)
+    Sex = DataFrame[Sex] == "Female"
+    Creatinine = DataFrame[Creatinine]
+    Age = DataFrame[Age]
+    Weight = DataFrame[Weight]
+    if Equation == 'MDRD': 
+        return (186 * (Creatinine**-1.154) * (Age**-0.203) * (0.742*Sex) + 
+               186 * (Creatinine**-1.154) * (Age**-0.203) * (~Sex))
+    elif Equation == 'Cockcroft-Gault':
+        return ((140 - Age) * (Weight) * (0.85 * Sex) / (72 * Creatinine) + 
+               (140 - Age) * (Weight) * (1 * ~Sex) / (72 * Creatinine))
