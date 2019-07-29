@@ -39,6 +39,9 @@ def BMI_Calculator (DataFrame, Height = "Height", Weight =  'Weight', Unit = 'cm
 def IBW_Calculator (DataFrame, Height = "Height", Sex =  'Sex', Unit = 'cm'):
 # Version: 1.0 (15/7/2019) 
 # Aim: calculate the ideal body weight
+# Method:
+## Ideal body weight (IBW) (men) = 50 kg + 2.3 kg x (height, in - 60)
+## Ideal body weight (IBW) (women) = 45.5 kg + 2.3 kg x  (height, in - 60)
     if Unit == 'cm':
         Height = DataFrame[Height] * 0.393701
     elif Unit == 'm': 
