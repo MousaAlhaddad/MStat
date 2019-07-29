@@ -56,6 +56,7 @@ df['Ideal_Weight'] = IBW_Calculator(df)
 def ABW_Calculator (DataFrame, IBW = "Ideal_Weight", Weight =  'Weight'):
 # Version: 1.0 (15/7/2019) 
 # Aim: calculate the adjusted body weight
+# Method: ABW = IBW + 0.4 x (actual body weight - IBW)
     IBW = DataFrame[IBW] 
     Weight = DataFrame[Weight] 
     return (IBW + 0.4 * (Weight - IBW))
