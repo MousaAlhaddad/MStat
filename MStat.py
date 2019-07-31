@@ -77,18 +77,41 @@ def Corrected_Weight_Calculator (DataFrame, Weight =  'Weight', IBW = "Ideal_Wei
     return (Corrected_Weight)
 
 def GFR_Calculator (DataFrame, Creatinine='Creatinine', Sex =  'Sex', Age='Age', Weight = 'Weight', Equation='MDRD'): 
-# Version: 1.0 (29/7/2019) 
+# Version: 2.0 (31/7/2019) 
 # Assumption: No Black Patients 
 # Method: 
 ## GFR by the MDRD Equation = 186 × Serum Cr^-1.154 * age^-0.203 × 1.212 (if patient is black) × 0.742 (if female)
 ## CrCl by the Cockcroft-Gault Equation == (140 – age) × (weight, kg) × (0.85 if female) / (72 × Cr)
-    Sex = DataFrame[Sex] == "Female"
+## GFR by CKD-EPI Equation = A × (Scr/B)^C × 0.993^age × (1.159 if black) where A, B, and C change (See bellow)
+    IsFemale = DataFrame[Sex] == "Female"
+    Sex = DataFrame[Sex]
     Creatinine = DataFrame[Creatinine]
     Age = DataFrame[Age]
     Weight = DataFrame[Weight]
     if Equation == 'MDRD': 
-        return (186 * (Creatinine**-1.154) * (Age**-0.203) * (0.742*Sex) + 
-               186 * (Creatinine**-1.154) * (Age**-0.203) * (~Sex))
+        return (186 * (Creatinine**-1.154) * (Age**-0.203) * (0.742*IsFemale) + 
+               186 * (Creatinine**-1.154) * (Age**-0.203) * (~IsFemale))
     elif Equation == 'Cockcroft-Gault':
-        return ((140 - Age) * (Weight) * (0.85 * Sex) / (72 * Creatinine) + 
-               (140 - Age) * (Weight) * (1 * ~Sex) / (72 * Creatinine))
+        return ((140 - Age) * (Weight) * (0.85 * IsFemale) / (72 * Creatinine) + 
+               (140 - Age) * (Weight) * (1 * ~IsFemale) / (72 * Creatinine))
+    elif Equation == 'CKD-EPI':
+        DataFrame['CKD-EPI Equation'] = np.NaN 
+        CKD = DataFrame['CKD-EPI Equation']
+        for x in range(len(CKD)):
+            if Sex.iloc[x] == 'Male':
+                A = 141
+                B = 0.9
+                if Creatinine.iloc[x] <= 0.9:
+                    C = -0.411
+                else: 
+                    C = -1.209
+                CKD.iloc[x] = A * ((Creatinine.iloc[x]/B)** C) * (0.993 ** Age.iloc[x])
+            elif Sex.iloc[x] == 'Female':
+                A = 144
+                B = 0.7
+                if Creatinine.iloc[x] <= 0.9:
+                    C = -0.329
+                else: 
+                    C = -1.209
+                CKD.iloc[x] = A * ((Creatinine.iloc[x]/B)** C) * (0.993 ** Age.iloc[x])
+        return (CKD)
