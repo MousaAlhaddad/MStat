@@ -42,6 +42,7 @@ def IBW_Calculator (DataFrame, Height = "Height", Sex =  'Sex', Unit = 'cm'):
 # Method:
 ## Ideal body weight (IBW) (men) = 50 kg + 2.3 kg x (height, in - 60)
 ## Ideal body weight (IBW) (women) = 45.5 kg + 2.3 kg x  (height, in - 60)
+# Example: df['Ideal_Weight'] = IBW_Calculator(df) 
     if Unit == 'cm':
         Height = DataFrame[Height] * 0.393701
     elif Unit == 'm': 
@@ -52,7 +53,6 @@ def IBW_Calculator (DataFrame, Height = "Height", Sex =  'Sex', Unit = 'cm'):
     Sex = DataFrame[Sex] == "Male"
     return (45.5 + 4.5 * Sex +  (2.3 * (Height - 60) ))
 
-df['Ideal_Weight'] = IBW_Calculator(df) 
 def ABW_Calculator (DataFrame, IBW = "Ideal_Weight", Weight =  'Weight'):
 # Version: 1.0 (15/7/2019) 
 # Aim: calculate the adjusted body weight
@@ -60,6 +60,21 @@ def ABW_Calculator (DataFrame, IBW = "Ideal_Weight", Weight =  'Weight'):
     IBW = DataFrame[IBW] 
     Weight = DataFrame[Weight] 
     return (IBW + 0.4 * (Weight - IBW))
+
+def Corrected_Weight_Calculator (DataFrame, Weight =  'Weight', IBW = "Ideal_Weight", ABW = 'Adjusted_Weight', BMI = 'BMI' ):
+# Version: 1.0 (31/7/2019) 
+# Aim: return actual weight for underweight patients, ideal weight for normal-weight patients 
+## and adjusted weight for overweight patients 
+    Weight = DataFrame[Weight] 
+    IBW = DataFrame[IBW] 
+    BMI = DataFrame[BMI]
+    Corrected_Weight = DataFrame[ABW].copy()
+    for x in range(len(Corrected_Weight)):
+        if BMI.iloc[x] == '<18.5':
+            Corrected_Weight.iloc[x] = Weight.iloc[x]
+        elif BMI.iloc[x] == '18.5 - 24.9':
+            Corrected_Weight.iloc[x] = IBW.iloc[x]  
+    return (Corrected_Weight)
 
 def GFR_Calculator (DataFrame, Creatinine='Creatinine', Sex =  'Sex', Age='Age', Weight = 'Weight', Equation='MDRD'): 
 # Version: 1.0 (29/7/2019) 
